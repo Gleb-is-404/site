@@ -1,0 +1,235 @@
+<html>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <head>
+        <title>my first Satana </title>
+        <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: scroll;
+            height: 100%;
+        }
+        .panel {
+            width: 30vw; /* Set the width of each column */
+            box-sizing: border-box; /* Include padding and border in the width */
+            padding: 10px; /* Add some padding for spacing */
+            border: 1px solid #ddd;
+            overflow-y: auto;
+
+        }
+        .window {
+            width: 100vw; /* Set the width of each column */
+            box-sizing: border-box; /* Include padding and border in the width */
+            padding: 10px; /* Add some padding for spacing */
+            border: 1px solid #ddd;
+            overflow-y: auto;
+
+        }
+        .colored-text {
+            background-color: #000000;
+            color: #ffffff; /* Replace with your preferred color code or name */
+            padding: 2px; /* Optional: Add padding for better visual appearance */
+        }
+        .container {
+            height: 100vh; /* Set the height to your desired value */
+            overflow-y: auto; /* Allow vertical scrolling */
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .column {
+            width: 48%; /* Set the width of each column */
+            box-sizing: border-box; /* Include padding and border in the width */
+            padding: 10px; /* Add some padding for spacing */
+            border: 1px solid #ddd; /* Add a border for visual separation */
+        }
+    </style>
+         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+        <script>
+        var data={}
+        function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            // Search for a cookie that starts with the given name
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+var data_set = {'data_read':0, 'text':'', 'function_exec':'', 'function':0, 'delete_name':'', 'main_tag':'', 'side_tag':''};
+        function sendDataToDjango(func, data) {
+    // Data to send
+    var dataToSend = {
+        func: func,
+        data: data
+        // Add more data as needed
+    };
+
+    // AJAX request
+    $.ajax({
+        type: 'POST',
+        url: '/handle_request/',  // Update with the actual URL
+        data: JSON.stringify(dataToSend),
+        contentType: 'application/json; charset=utf-8',
+        dataType: 'json',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')  // Include CSRF token in the headers
+        },
+        success: function(response) {
+            // Handle the response from the Django view
+            data_set=response;
+        },
+        error: function(error) {
+            // Handle errors
+            console.error('Error:', error);
+        }
+    });
+}
+
+// Call the function when needed
+sendDataToDjango('data_sender', data_set);
+
+        </script>
+        <script>
+            sendDataToDjango('tag_loader',  data_set);
+            var l = 'int';
+            var pyinfo = 'iijk';
+            function output_loader(i){
+                data_set['function_exec']={};
+                for (var k = 0; k <data_set['data_read'][i][3].length ; k++){
+                    data_set['function_exec'][data_set['data_read'][i][3][k]]=document.getElementById(data_set['data_read'][i][3][k]).value
+                }
+                data_set['function']=data_set['data_read'][i][4]
+                sendDataToDjango('func_do', data_set);
+                console.log(String(data_set['text']));
+                setTimeout(function() {
+                document.getElementById('output'+i).textContent=String(data_set['text']);}, 10);
+                
+            }
+            function deleter(i){
+                data_set['delete_name']=data_set['data_read'][i][1];
+                sendDataToDjango('deleter', data_set);
+            }
+            function load(){
+                sendDataToDjango('data_sender', data_set);
+                setTimeout(function() {
+
+                window2.innerHTML=('');
+                        for (var i = 0; i < data_set['data_read'].length; i++) {
+                                window2.innerHTML += (data_set['data_read'][i][0].slice(0,10) + '  ');
+                                for (var k = 0; k < 2; k++) {
+                                    window2.innerHTML += (data_set['data_read'][i][5][k] + ' ');
+                                }
+                                window2.innerHTML += ("<br>" + data_set['data_read'][i][1] + "<br>");
+                                window2.innerHTML += (data_set['data_read'][i][2] + "<br>");
+                                window2.innerHTML += (data_set['data_read'][i][3] + "<br>");
+                                for (var k = 0; k <data_set['data_read'][i][3].length ; k++) {
+                                    console.log(data_set['data_read'][i][3][k])
+                                     window2.innerHTML += ('<input type="text" id=' + data_set['data_read'][i][3][k] + ' placeholder=' + data_set['data_read'][i][3][k]+'>');
+                                }
+                                window2.innerHTML += '<br>';
+                                var code='';
+                                code+="<span class='colored-text'>";
+                                for (var k = 0; k <data_set['data_read'][i][4].split('\n').length ; k++) {
+                                     code += (data_set['data_read'][i][4].split('\n')[k]+"<br>");
+                                }
+                                code+='</span>';
+                                window2.innerHTML+=code;
+                                window2.innerHTML += '<p id="output'+i+'"></p>';
+                                window2.innerHTML += '<button onclick="output_loader('+i+');">start function</button>';
+                                window2.innerHTML += '<button onclick="deleter('+i+');">x</button>';
+                                window2.innerHTML +='<hr>';
+    }}, 10);
+
+            }
+            function dat(b) {
+                
+                for (let i = 0; i <= b.length-1; i++){
+                
+                    if (document.getElementById(b[i]).textContent == '')
+
+                        {document.getElementById(b[i]).textContent = b[i];}
+                    else
+                        {document.getElementById(b[i]).textContent = '';}
+                }}
+function valid(inp, t){
+    var velid=false;
+    if (t==1){
+        for (var i = 0; i < data_set['main'].length; i++) {
+            if (data_set['main'][i] === inp.value){
+                velid=true;
+                data_set['main_tag']=inp.value;
+            }
+        }
+    }
+    if (t==2){
+        for (var i = 0; i < data_set['side'].length; i++) {
+            if (data_set['side'][i] === inp.value){
+                velid=true;
+                data_set['side_tag']=inp.value;
+            }
+        }
+    }
+    if (!velid) {
+        inp.value = '';
+        data_set['main_tag']=inp.value;
+    }
+console.log(data_set);
+
+}
+    // Call the function with the array
+          </script>
+    </head>
+    <body>
+<div class="container">
+    <div class="panel" id="window1">
+    <datalist id="datalist1">
+</datalist>
+<datalist id="datalist2">
+</datalist>
+<script>
+var datalist = document.getElementById('datalist1');
+var datalist2 = document.getElementById('datalist2');
+sendDataToDjango('tag_loader',  data_set);
+setTimeout(function() {
+for (var i = 0; i < data_set['main'].length; i++) {
+    var option = document.createElement('option');
+        option.value = data_set['main'][i];
+        datalist.appendChild(option);
+}
+for (var i = 0; i < data_set['side'].length; i++) {
+    var option = document.createElement('option');
+        option.value = data_set['side'][i];
+        datalist2.appendChild(option);
+
+}    
+}, 10);
+
+
+</script>
+    <table border="1">
+            <tr>
+                <td>
+                    <input id='main' list="datalist1" placeholder="main tag" oninput="valid(this, 1)"><br>
+                    <input id='side' list="datalist2" placeholder="side tag" oninput="valid(this, 2)">
+                </td>
+            </tr>
+            <tr>
+                <td><button onclick="load()">load page</button></td>
+            </tr>
+        </table>
+
+</div>
+
+<div class="window" id="window2">
+</div>
+</div>
+    </body>
+</html>
