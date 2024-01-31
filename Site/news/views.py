@@ -3,6 +3,7 @@ from .models import int_info, users, tag
 from django.http import JsonResponse
 import django.contrib.auth
 from urllib.parse import unquote
+from django.views.decorators.http import require_http_methods
 '''
 from .forms import PostForm
 from django.views.generic import DetailView, UpdateView, DeleteView'''
@@ -30,6 +31,8 @@ cursor.execute(query)
 # Fetch all rows from the result set
 rows = cursor.fetchall()'''
 '''tag.objects.create(name=inp['name'], surname=inp['surname'], email_address=inp['email'], points=100)''' 
+for x in users.objects.all():
+        print(x.email_address, 7)
 def func_do(inp):
     locals().update(inp['function_exec'])
     original_stdout = sys.stdout
@@ -68,8 +71,14 @@ def tag_loader(inp):
     inp['side']=side
     return inp
 function_list={'data_sender':data_sender,'data_saver':data_saver, 'func_do':func_do, 'deleter':deleter, 'registrator':registrator, 'tag_loader':tag_loader}
+def handle(request):
+    print(9657244)
+    x=json.loads(unquote(request.body))
+    return JsonResponse({'out':function_list[x['function']](x['data'])})
 def handle_request(request):
+    print(77777)
     if request.method == 'POST':
+
         try:
             # Get data from the POST request
             data = json.loads(request.body.decode('utf-8'))
@@ -90,6 +99,7 @@ def handle_request(request):
 data = int_info.objects.all()
 diction={'int':data}
 def add_data(request):
+    print(request.session['user_data'])
     if list(users.objects.filter(email_address=request.session['user_data']))!=[]:
         return render(request, 'news/kek.html')
 def signup(request):

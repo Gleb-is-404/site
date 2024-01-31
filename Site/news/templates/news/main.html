@@ -7,20 +7,40 @@
         }
 </style>
 <script>
-    function getCookie(name) {
-    var cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-            var cookie = cookies[i].trim();
-            // Search for a cookie that starts with the given name
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
+function send(a){
+        
+fetch('/handle/', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+         'X-CSRFToken': getCSRFToken(),
+    },
+    body: JSON.stringify({'data':data_set, 'function':a}),
+})
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
             }
+            return response.json(); // or response.text() depending on your view
+        })
+        .then(data => {
+            data_set=data['out']
+            console.log('Response from Django:', data);
+            // Handle the response as needed
+        })
+        .catch(error => {
+            console.error('Error during fetch:', error);
+        });
+    }
+function getCSRFToken() {
+    var cookies = document.cookie.split(';');
+    for (var i = 0; i < cookies.length; i++) {
+        var cookie = cookies[i].trim();
+        if (cookie.startsWith('csrftoken=')) {
+            return cookie.substring('csrftoken='.length, cookie.length);
         }
     }
-    return cookieValue;
+    return null;
 }
 function sendDataToDjango(func, data) {
     // Data to send

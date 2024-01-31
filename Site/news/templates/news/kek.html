@@ -4,20 +4,39 @@
 <head>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 <script>
-    function getCookie(name) {
-    var cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-            var cookie = cookies[i].trim();
-            // Search for a cookie that starts with the given name
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
+function send(a){
+fetch('/handle/', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+         'X-CSRFToken': getCSRFToken(),
+    },
+    body: JSON.stringify({'data':data_set, 'function':a}),
+})
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
             }
+            return response.json(); // or response.text() depending on your view
+        })
+        .then(data => {
+            data_set=data['out']
+            console.log('Response from Django:', data);
+            // Handle the response as needed
+        })
+        .catch(error => {
+            console.error('Error during fetch:', error);
+        });
+    }
+function getCSRFToken() {
+    var cookies = document.cookie.split(';');
+    for (var i = 0; i < cookies.length; i++) {
+        var cookie = cookies[i].trim();
+        if (cookie.startsWith('csrftoken=')) {
+            return cookie.substring('csrftoken='.length, cookie.length);
         }
     }
-    return cookieValue;
+    return null;
 }
 async function sendDataToDjango(func, data) {
     // Data to send
@@ -108,9 +127,9 @@ function sender(){
     data_set['function_function']=document.getElementById("function_function").value;
     data_set['function_tags']=[document.getElementById("main tag").value, document.getElementById("side tag").value];
     data={'function_name':document.getElementById("function_name").value, 'function_description':document.getElementById("function_description").value, 'function_input':inp_list, 'function_function':document.getElementById("function_function").value, 'function_tags':[document.getElementById("main tag").value, document.getElementById('side tag').value]}
-    sendDataToDjango('data_saver',  data_set);
+    send('data_saver');
 };
-sendDataToDjango('data_sender', data_set);
+send('data_sender');
 function valid(inp, t){
     var velid=false;
     if (t==1){
@@ -165,7 +184,7 @@ function valid(inp, t){
 <script>
 var datalist = document.getElementById('datalist1');
 var datalist2 = document.getElementById('datalist2');
-sendDataToDjango('tag_loader',  data_set);
+send('tag_loader');
 setTimeout(function() {
 for (var i = 0; i < data_set['main'].length; i++) {
     var option = document.createElement('option');
@@ -178,7 +197,7 @@ for (var i = 0; i < data_set['side'].length; i++) {
         datalist2.appendChild(option);
 
 }    
-}, 10);
+}, 1000);
 
 
 </script>

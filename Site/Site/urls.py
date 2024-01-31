@@ -15,9 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from news.views import index, add_data, signup, handle_request, main_page, login
+from news.views import index, add_data, signup, handle_request, main_page, login, handle
 from django.contrib.auth import views as auth_views
 urlpatterns = [
+    path('handle/', handle, name='handle'),
     path('handle_request/', handle_request, name='handle_request'),
     path('admin/', admin.site.urls),
     path('news/', index, name='news'),
